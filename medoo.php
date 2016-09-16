@@ -141,6 +141,8 @@ class medoo
 				$this->option
 			);
 
+      $this->runInPdo($this->pdo);
+
 			foreach ($commands as $value)
 			{
 				$this->pdo->exec($value);
@@ -151,37 +153,44 @@ class medoo
 		}
 	}
 
-	public function query($query)
-	{
-		if ($this->debug_mode)
-		{
-			echo $query;
+  protected function runInPdo($myPdo) {
+    $myPdo->setAttribute(
+      PDO::ATTR_ERRMODE, 
+      PDO::ERRMODE_EXCEPTION
+    );
+  }
 
-			$this->debug_mode = false;
+	public function query($query) { 
+    if ($this->debug_mode) {
+      echo $query;
+      $this->debug_mode = false;
+      return false;
+    }
+    $this->logs[] = $query;
+    try {
+      return $this->pdo->query($query);
+    } catch(Exception $e){
+      $err = $this->error();
+      $msg = "{$err[2]}=>{$query} (" . $e->getMessage() . ")";
+      trigger_error ( $msg );
+    }
+  }
 
-			return false;
-		}
-
-		$this->logs[] = $query;
-
-		return $this->pdo->query($query);
-	}
-
-	public function exec($query)
-	{
-		if ($this->debug_mode)
-		{
-			echo $query;
-
-			$this->debug_mode = false;
-
-			return false;
-		}
-
-		$this->logs[] = $query;
-
-		return $this->pdo->exec($query);
-	}
+  public function exec($query) { 
+    if ($this->debug_mode) { 
+      echo $query;
+      $this->debug_mode = false;
+      return false;
+    }
+    $this->logs[] = $query;
+    try {
+      return $this->pdo->exec($query);
+    } catch(Exception $e){
+      $err = $this->error();
+      $msg = "{$err[2]}=>{$query} (" . $e->getMessage() . ")";
+      trigger_error ( $msg );
+    }
+  }
 
 	public function quote($string)
 	{
