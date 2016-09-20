@@ -952,7 +952,7 @@ class medoo
 
 		$is_single_column = (is_string($column) && $column !== '*');
 
-		$query = $this->query($this->select_context($table, $join, $columns, $where) . ' LIMIT 1');
+		$query = $this->query($this->select_context($table, $join, $columns, $where));
 
 		if ($query)
 		{
